@@ -2,22 +2,38 @@
 
 import importlib
 import pkgutil
+from types import ModuleType
 
 import sklearn
 import yaml
 
 
-def _get_all_objects():  # TODO
-    """Get all sklearn objects."""
+def _get_submodules(module):
+    """Get all submodules of a module."""
+    if hasattr(module, "__path__"):
+        return [name for _, name, ispkg in pkgutil.iter_modules(module.__path__)]
+    return []
+
+
+def _get_all_objects(module):
+    """Get all objects from a module."""
     objs = []
-    for _, name, _ in pkgutil.iter_modules(sklearn.__path__):
+    submodules = _get_submodules(module)
+
+    for name in dir(module):
         if not name.startswith("_"):
-            objs.append(name)
+            obj = getattr(module, name)
+            if name in submodules:
+                objs += _get_all_objects(obj)
+            else:
+                objs.append(f"{module.__name__}.{name}")
+                
     return objs
 
 
 def get_object(name):
     """Get a sklearn object from its name."""
+    objs = _get_all_objects(sklearn)
     module_name = ".".join(name.split(".")[:-1])
     if not module_name.startswith("sklearn"):
         module_name = "sklearn." + module_name
