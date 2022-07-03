@@ -1,49 +1,42 @@
 """Define Scikit-Learn objects using YAML"""
 
-import importlib
+import inspect
 import pkgutil
-from types import ModuleType
 
 import sklearn
+from sklearn._config import set_config
 import yaml
+
+# set_config(print_changed_only=True)
 
 
 def _get_submodules(module):
     """Get all submodules of a module."""
     if hasattr(module, "__path__"):
-        return [name for _, name, ispkg in pkgutil.iter_modules(module.__path__)]
+        return [name for _, name, _ in pkgutil.iter_modules(module.__path__)]
     return []
 
 
 def _get_all_objects(module):
     """Get all objects from a module."""
-    objs = []
+    objs = {}
     submodules = _get_submodules(module)
 
     for name in dir(module):
         if not name.startswith("_"):
             obj = getattr(module, name)
             if name in submodules:
-                objs += _get_all_objects(obj)
-            else:
-                objs.append(f"{module.__name__}.{name}")
-                
+                objs.update(_get_all_objects(obj))
+            elif inspect.isclass(obj) or inspect.isfunction(obj):
+                objs[name] = obj
+
     return objs
 
 
-def get_object(name):
-    """Get a sklearn object from its name."""
-    objs = _get_all_objects(sklearn)
-    module_name = ".".join(name.split(".")[:-1])
-    if not module_name.startswith("sklearn"):
-        module_name = "sklearn." + module_name
-    object_name = name.split(".")[-1]
-    module = importlib.import_module(module_name)
-    return getattr(module, object_name)
-
-
 def _dict2py(dic):
-    """Create a sklearn instance from dict structure."""
+    """Create a python instance from dict structure."""
+    objs = _get_all_objects(sklearn)
+
     if isinstance(dic, list):
         for i, item in enumerate(dic):
             dic[i] = _dict2py(item)
@@ -53,13 +46,27 @@ def _dict2py(dic):
         for key in dic.keys():
             dic[key] = _dict2py(dic[key])
             kwargs = dic[key] if dic[key] is not None else {}
-            return get_object(key)(**kwargs)
+            try:
+                return objs[key](**kwargs)
+            except KeyError:
+                pass
         return dic
 
     return dic
 
 
+def _py2dict(py):
+    """Create a dict from a python object."""
+    return eval("dict(" + str(py).replace("(", "=dict(") + ",)")
+
+
 def yaml2py(path):
-    """Create a YAML string from a python object."""
+    """Create a python object from a YAML file."""
     with open(path, mode="r", encoding="utf-8") as file:
         return _dict2py(yaml.load(file, Loader=yaml.SafeLoader))
+
+
+def py2yaml(obj, path):
+    """Create a YAML file from a python object."""
+    with open(path, mode="w", encoding="utf-8") as file:
+        yaml.dump(_py2dict(obj), file, Dumper=yaml.SafeDumper)

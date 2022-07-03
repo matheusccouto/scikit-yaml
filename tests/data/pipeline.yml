@@ -1,0 +1,6 @@
+Pipeline:
+  steps:
+    - - scaler
+      - StandardScaler:
+    - - svc
+      - SVC:
