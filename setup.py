@@ -1,8 +1,11 @@
 """Setup Python package."""
 
+import os
 import setuptools
 
-with open("requirements.txt", encoding="utf-8") as f:
+THIS_DIR = os.path.dirname(__file__)
+
+with open(os.path.join(THIS_DIR, "requirements.txt"), encoding="utf-8") as f:
     required = f.read().splitlines()
 
 setuptools.setup(
