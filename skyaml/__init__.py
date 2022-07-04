@@ -3,9 +3,9 @@
 import json
 import inspect
 import pkgutil
-import re
 
 import sklearn
+from sklearn.utils._pprint import _changed_params
 import yaml
 
 
@@ -54,38 +54,23 @@ def _dict2py(dic):
     return dic
 
 
-def _py2dict(py):
+class SKLearnEncoder(json.JSONEncoder):
+    """Encode SKLearn objects to JSON."""
+
+    def default(self, o):
+        """Default encoding."""
+        if isinstance(o, (sklearn.base.BaseEstimator, sklearn.base.TransformerMixin)):
+            name = o.__class__.__name__
+            params = _changed_params(o)
+            if params == {}:
+                params = None
+            return {name: params}
+        return json.JSONEncoder.default(self, o)
+
+
+def _py2dict(py):  # pylint: disable=invalid-name
     """Create a dict from a python object."""
-    txt = str(py)
-
-    # Transform tuples in lists.
-    txt = re.sub(r"(?<=[\[\s])\(", "[", txt)
-    txt = re.sub(r"(?<=\))\)(?=[\]\,])", "]", txt)
-
-    # Transform kwargs in dicts.
-    txt = re.sub(r"(?<=[\w\d])\(", ": {", txt)
-    txt = re.sub(r"\)", "}", txt)
-
-    # Envolve it in brackets:
-    txt = "{" + txt + "}"
-    txt = re.sub(r"(?<!\{)\b\w+\:\s*\{.*?\}", r"{\g<0>}", txt)
-
-    # Add collons.
-    txt = re.sub(r"=", ":", txt)
-
-    # Add quotes.
-    txt = re.sub(r"[\w]+(?=\:)", r"'\g<0>'", txt)
-
-    # Transform single quotes into double
-    txt = txt.replace("'", '"')
-
-    # Replace some keywords:
-    txt = txt.replace("True", "true")
-    txt = txt.replace("False", "false")
-    txt = txt.replace("None", "null")
-    txt = txt.replace("{}", "null")
-
-    return json.loads(txt)
+    return json.loads(json.dumps(py, cls=SKLearnEncoder))
 
 
 def yaml2py(path):
