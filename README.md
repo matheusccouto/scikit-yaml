@@ -11,8 +11,8 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install Bluff.
 ```bash
 pip install scikit-yaml
 ```
-### Usage
-#### Define a Scikit-Learn object from YAML file.
+## Usage
+### Create a YAML file from a Scikit-Learn from YAML file.
 ```python
 import skyaml
 from sklearn.pipeline import Pipeline
@@ -32,7 +32,7 @@ Pipeline:
       - SVC:
 ```
 
-#### Create a YAML file from a Scikit-Learn from YAML file.
+### Define a Scikit-Learn object from YAML file.
 Recreate the original pipeline.
 ```python
 import skyaml
