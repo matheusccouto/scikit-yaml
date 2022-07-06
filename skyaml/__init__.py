@@ -3,6 +3,7 @@
 import json
 import inspect
 import pkgutil
+import os
 
 import sklearn
 from sklearn.utils._pprint import _changed_params
@@ -75,8 +76,10 @@ def _py2dict(py):  # pylint: disable=invalid-name
 
 def yaml2py(path):
     """Create a python object from a YAML file."""
-    with open(path, mode="r", encoding="utf-8") as file:
-        return _dict2py(yaml.load(file, Loader=yaml.SafeLoader))
+    if os.path.exists(path):
+        with open(path, mode="r", encoding="utf-8") as file:
+            path = file.read()
+    return _dict2py(yaml.load(path, Loader=yaml.SafeLoader))
 
 
 def py2yaml(obj, path):
