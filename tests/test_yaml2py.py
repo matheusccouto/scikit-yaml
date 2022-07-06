@@ -2,6 +2,7 @@
 
 import os
 
+import sklearn.compose
 import sklearn.ensemble
 import sklearn.linear_model
 import sklearn.pipeline
@@ -41,6 +42,34 @@ def test_pipeline():
         [
             ["scaler", sklearn.preprocessing.StandardScaler()],
             ["svc", sklearn.svm.SVC()],
+        ]
+    )
+    assert str(yml) == str(py)
+
+
+def test_deeper_pipeline():
+    """Test get linear model."""
+    yml = skyaml.yaml2py(os.path.join(DATA_DIR, "deeper_pipeline.yml"))
+    py = sklearn.pipeline.Pipeline(
+        [
+            [
+                "ColumnTransformer",
+                sklearn.compose.ColumnTransformer(
+                    transformers=[
+                        "Encoder",
+                        sklearn.preprocessing.OneHotEncoder(sparse=False),
+                        [0],
+                    ],
+                    remainder=sklearn.preprocessing.PowerTransformer(),
+                ),
+            ],
+            [
+                "Regressor",
+                sklearn.ensemble.HistGradientBoostingRegressor(
+                    loss="poisson",
+                    random_state=0,
+                ),
+            ],
         ]
     )
     assert str(yml) == str(py)
