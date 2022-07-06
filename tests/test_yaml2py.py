@@ -24,6 +24,12 @@ def test_linear_model():
     assert type(yml) is type(py)
 
 
+def test_kmeans():
+    """Test get KMeans model."""
+    yml = skyaml.yaml2py(os.path.join(DATA_DIR, "kmeans.yml"))
+    assert isinstance(yml, sklearn.base.BaseEstimator)
+
+
 def test_gradient_boosting():
     """Test get linear model."""
     yml = skyaml.yaml2py(os.path.join(DATA_DIR, "gradient_boosting.yml"))

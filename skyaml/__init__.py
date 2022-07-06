@@ -1,6 +1,7 @@
 """Define Scikit-Learn objects using YAML"""
 
 import json
+import importlib
 import inspect
 import pkgutil
 import os
@@ -8,6 +9,50 @@ import os
 import sklearn
 from sklearn.utils._pprint import _changed_params
 import yaml
+
+
+MODULES = [
+    "sklearn.base",
+    "sklearn.calibration",
+    "sklearn.cluster",
+    "sklearn.compose",
+    "sklearn.covariance",
+    "sklearn.cross_decomposition",
+    "sklearn.datasets",
+    "sklearn.decomposition",
+    "sklearn.discriminant_analysis",
+    "sklearn.dummy",
+    "sklearn.ensemble",
+    "sklearn.exceptions",
+    "sklearn.experimental",
+    "sklearn.feature_extraction",
+    "sklearn.feature_selection",
+    "sklearn.gaussian_process",
+    "sklearn.impute",
+    "sklearn.inspection",
+    "sklearn.isotonic",
+    "sklearn.kernel_approximation",
+    "sklearn.kernel_ridge",
+    "sklearn.linear_model",
+    "sklearn.manifold",
+    "sklearn.metrics",
+    "sklearn.mixture",
+    "sklearn.model_selection",
+    "sklearn.multiclass",
+    "sklearn.multioutput",
+    "sklearn.naive_bayes",
+    "sklearn.neighbors",
+    "sklearn.neural_network",
+    "sklearn.pipeline",
+    "sklearn.preprocessing",
+    "sklearn.random_projection",
+    "sklearn.semi_supervised",
+    "sklearn.svm",
+    "sklearn.tree",
+    "sklearn.utils",
+]
+for mod in MODULES:
+    importlib.import_module(mod)
 
 
 def _get_submodules(module):
@@ -21,7 +66,6 @@ def _get_all_objects(module):
     """Get all objects from a module."""
     objs = {}
     submodules = _get_submodules(module)
-
     for name in dir(module):
         if not name.startswith("_"):
             obj = getattr(module, name)
