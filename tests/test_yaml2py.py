@@ -70,7 +70,7 @@ def test_deeper_pipeline():
                 ),
             ],
             [
-                "Regressor",
+                "regressor",
                 sklearn.ensemble.HistGradientBoostingRegressor(
                     loss="poisson",
                     random_state=0,

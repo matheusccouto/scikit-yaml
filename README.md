@@ -1,3 +1,5 @@
+**Deprecated! Please use [scikit-dict](https://github.com/matheusccouto/scikit-dict) instead.**
+
 # scikit-yaml
 Define Scikit-Learn objects using YAML
 
